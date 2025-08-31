@@ -78,9 +78,9 @@
         }
         #draw-pile, #discard-pile, #drawn-card {
             width: 20vw;
-            height: 15vh;
+            height: 10vh;
             border: 2px dashed #2A4D69;
-            line-height: 15vh;
+            line-height: 10vh;
             font-size: 4vw;
             color: #2A4D69;
         }
@@ -157,12 +157,12 @@
                 gap: 0.5vw;
             }
             .player-grid .empty-slot {
-                height: 15vh;
+                height: 10vh;
             }
             .card {
                 width: 23vw;
-                height: 15vh;
-                line-height: 15vh;
+                height: 10vh;
+                line-height: 10vh;
                 font-size: 5vw;
             }
             #center {
@@ -170,8 +170,8 @@
             }
             #draw-pile, #discard-pile, #drawn-card {
                 width: 23vw;
-                height: 15vh;
-                line-height: 15vh;
+                height: 10vh;
+                line-height: 10vh;
                 font-size: 5vw;
             }
             #status {
@@ -405,7 +405,7 @@
             drawn.classList.toggle('face-up', drawnCard !== null);
             drawn.classList.toggle('card', drawnCard !== null);
             if (drawnCard !== null) {
-                drawn.classList.remove('card-value-negative', 'card-value-low', 'card-value-medium', 'card-value-high');
+                discard.classList.remove('card-value-negative', 'card-value-low', 'card-value-medium', 'card-value-high');
                 if (drawnCard <= -1) {
                     drawn.classList.add('card-value-negative');
                 } else if (drawnCard >= 0 && drawnCard <= 4) {
