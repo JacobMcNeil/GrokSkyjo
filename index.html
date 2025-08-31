@@ -1,0 +1,517 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skyjo: Beach Adventure</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom, #F4E4BC, #4ECDC4);
+            margin: 0;
+            padding: 1rem;
+        }
+        #game {
+            max-width: 90vw;
+            margin: 0 auto;
+        }
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 20vw);
+            gap: 2vw;
+            margin: 2vh 0;
+            max-width: 100%;
+        }
+        .card {
+            width: 20vw;
+            height: 30vw;
+            line-height: 30vw;
+            font-size: 5vw;
+            border: 2px solid #2A4D69;
+            border-radius: 10px;
+            box-sizing: border-box;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .face-up {
+            background-color: #95E1D3;
+            color: #2A4D69;
+        }
+        .face-down {
+            background: url('https://www.transparenttextures.com/patterns/wave-pattern.png'), #4ECDC4;
+            color: #fff;
+        }
+        #center {
+            display: flex;
+            justify-content: center;
+            gap: 5vw;
+            margin: 2vh 0;
+            flex-wrap: wrap;
+        }
+        .pile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #draw-pile, #discard-pile, #drawn-card {
+            width: 20vw;
+            height: 30vw;
+            border: 2px dashed #2A4D69;
+            line-height: 30vw;
+            font-size: 5vw;
+            background-color: #95E1D3;
+            color: #2A4D69;
+        }
+        #draw-pile.face-down {
+            background: url('https://www.transparenttextures.com/patterns/palm-leaf.png'), #4ECDC4;
+            color: #fff;
+        }
+        #drawn-card.face-up {
+            background-color: #95E1D3;
+        }
+        #status {
+            font-size: 4vw;
+            margin: 1vh 0;
+            color: #2A4D69;
+            text-shadow: 1px 1px 2px #F4E4BC;
+        }
+        #score-table {
+            width: 80%;
+            margin: 2vh auto;
+            border-collapse: collapse;
+            background-color: #95E1D3;
+            color: #2A4D69;
+            font-size: 4vw;
+            text-shadow: 1px 1px 2px #F4E4BC;
+        }
+        #score-table th, #score-table td {
+            border: 1px solid #F4E4BC;
+            padding: 1vw;
+        }
+        #score-table th {
+            background-color: #4ECDC4;
+        }
+        button {
+            padding: 2vw 4vw;
+            margin: 2vw;
+            font-size: 4vw;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #FF6B6B;
+            color: #fff;
+            border: 2px solid #2A4D69;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background-color: #FF8787;
+        }
+        #player2-grid .face-down {
+            cursor: default;
+        }
+        @media (max-width: 600px) {
+            .player-grid {
+                grid-template-columns: repeat(4, 22vw);
+                gap: 1vw;
+            }
+            .card {
+                width: 22vw;
+                height: 33vw;
+                line-height: 33vw;
+                font-size: 6vw;
+            }
+            #draw-pile, #discard-pile, #drawn-card {
+                width: 22vw;
+                height: 33vw;
+                line-height: 33vw;
+                font-size: 6vw;
+            }
+            #center {
+                gap: 3vw;
+            }
+            #status, #score-table {
+                font-size: 5vw;
+            }
+            #score-table th, #score-table td {
+                padding: 1.5vw;
+            }
+            button {
+                padding: 3vw 6vw;
+                font-size: 5vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h1>Skyjo: Beach Adventure</h1>
+        <div id="status">Setting up game...</div>
+        <table id="score-table">
+            <thead>
+                <tr>
+                    <th>Round</th>
+                    <th>Player 1</th>
+                    <th>Player 2</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <h2>Player 2</h2>
+        <div id="player2-grid" class="player-grid"></div>
+        <div id="center">
+            <div class="pile" id="draw-pile-container">
+                <div id="draw-pile" class="card face-down">??</div>
+                <label>Treasure Chest</label>
+            </div>
+            <div class="pile" id="drawn-card-container">
+                <div id="drawn-card" class="card">None</div>
+                <label>Message in a Bottle</label>
+            </div>
+            <div class="pile" id="discard-pile-container">
+                <div id="discard-pile" class="card face-up"></div>
+                <label>Driftwood Pile</label>
+            </div>
+        </div>
+        <h2>Player 1</h2>
+        <div id="player1-grid" class="player-grid"></div>
+        <button id="restart" style="display: none;">Restart Game</button>
+    </div>
+    <script>
+        // Card distribution based on rules
+        function createDeck() {
+            const deck = [];
+            for (let i = 0; i < 5; i++) deck.push(-2);
+            for (let i = 0; i < 10; i++) deck.push(-1);
+            for (let i = 0; i < 15; i++) deck.push(0);
+            for (let val = 1; val <= 12; val++) {
+                for (let i = 0; i < 10; i++) deck.push(val);
+            }
+            return deck;
+        }
+
+        // Shuffle array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Game state
+        let deck, drawPile, discardPile, player1Grid, player2Grid, currentPlayer, drawnCard, flipMode, isLastTurn, roundEnder;
+        let player1TotalScore = 0, player2TotalScore = 0, lastRoundEnder = null, roundScores = [];
+        let drawPileContainer = document.getElementById('draw-pile-container');
+        let discardPileContainer = document.getElementById('discard-pile-container');
+        let drawnCardContainer = document.getElementById('drawn-card-container');
+
+        function initGame() {
+            deck = shuffle(createDeck());
+            drawPile = deck.slice();
+            discardPile = [drawPile.pop()];
+            player1Grid = dealGrid();
+            player2Grid = dealGrid();
+            currentPlayer = determineStarter();
+            drawnCard = null;
+            flipMode = false;
+            isLastTurn = false;
+            roundEnder = null;
+            renderGrids();
+            updateDiscard();
+            updateDrawPile();
+            updateDrawnCard();
+            updateStatus();
+            updateScoreTable();
+            document.getElementById('restart').style.display = 'none';
+        }
+
+        function dealGrid() {
+            const grid = [];
+            for (let row = 0; row < 3; row++) {
+                grid[row] = [];
+                for (let col = 0; col < 4; col++) {
+                    grid[row][col] = { value: drawPile.pop(), faceUp: true };
+                }
+            }
+            // Randomly select one card to be face-down
+            const row = Math.floor(Math.random() * 3);
+            const col = Math.floor(Math.random() * 4);
+            grid[row][col].faceUp = false;
+            return grid;
+        }
+
+        function determineStarter() {
+            if (lastRoundEnder) {
+                return lastRoundEnder;
+            }
+            const player1Sum = sumFaceUp(player1Grid);
+            const player2Sum = sumFaceUp(player2Grid);
+            return player1Sum > player2Sum ? 'player1' : 'player2';
+        }
+
+        function sumFaceUp(grid) {
+            return grid.flat().filter(c => c && c.faceUp).reduce((sum, c) => sum + c.value, 0);
+        }
+
+        function renderGrids(revealOther = false) {
+            renderGrid('player1-grid', player1Grid, currentPlayer === 'player1', currentPlayer === 'player2' && revealOther);
+            renderGrid('player2-grid', player2Grid, currentPlayer === 'player2', currentPlayer === 'player1' && revealOther);
+        }
+
+        function renderGrid(id, grid, clickable, reveal = false) {
+            const container = document.getElementById(id);
+            container.innerHTML = '';
+            const isClickable = clickable && (drawnCard !== null || flipMode);
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const card = document.createElement('div');
+                    if (grid[row][col] !== null) {
+                        card.classList.add('card');
+                        if (grid[row][col].faceUp || reveal) {
+                            card.classList.add('face-up');
+                            card.textContent = grid[row][col].value;
+                        } else {
+                            card.classList.add('face-down');
+                            card.textContent = '??';
+                        }
+                        card.style.cursor = isClickable ? 'pointer' : 'default';
+                        if (isClickable) {
+                            card.onclick = () => handleGridClick(row, col, id);
+                        }
+                    } else {
+                        card.style.width = '20vw';
+                        card.style.height = '30vw';
+                    }
+                    container.appendChild(card);
+                }
+            }
+        }
+
+        function updateDiscard() {
+            const discard = document.getElementById('discard-pile');
+            const topCard = discardPile[discardPile.length - 1];
+            discard.textContent = topCard !== undefined ? topCard : 'Empty';
+            discard.classList.toggle('face-up', topCard !== undefined);
+            const canTake = drawnCard === null && flipMode === false && topCard !== undefined;
+            const canDiscard = drawnCard !== null && fromDraw && !flipMode;
+            discardPileContainer.style.cursor = (canTake || canDiscard) ? 'pointer' : 'default';
+            discardPileContainer.onclick = () => {
+                if (canTake) {
+                    drawFrom('discard');
+                } else if (canDiscard) {
+                    discardDrawn();
+                }
+            };
+        }
+
+        function updateDrawPile() {
+            const draw = document.getElementById('draw-pile');
+            draw.textContent = drawPile.length > 0 ? '??' : 'Empty';
+            draw.classList.toggle('face-down', drawPile.length > 0);
+            const canDraw = drawnCard === null && flipMode === false && drawPile.length > 0;
+            drawPileContainer.style.cursor = canDraw ? 'pointer' : 'default';
+            drawPileContainer.onclick = canDraw ? () => drawFrom('draw') : null;
+        }
+
+        function updateDrawnCard() {
+            const drawn = document.getElementById('drawn-card');
+            drawn.textContent = drawnCard !== null ? drawnCard : 'None';
+            drawn.classList.toggle('face-up', drawnCard !== null);
+            drawn.classList.toggle('card', drawnCard !== null);
+            drawn.style.cursor = 'default';
+            drawn.onclick = null;
+        }
+
+        function updateStatus() {
+            const status = document.getElementById('status');
+            if (flipMode) {
+                status.textContent = `${currentPlayer === 'player1' ? 'Player 1' : 'Player 2'}, flip a face-down card.`;
+            } else if (drawnCard !== null) {
+                status.textContent = `${currentPlayer === 'player1' ? 'Player 1' : 'Player 2'}, drawn: ${drawnCard}. Swap with a grid card${fromDraw ? ' or discard to flip.' : ' (must swap).'}`;
+            } else {
+                status.textContent = `${currentPlayer === 'player1' ? 'Player 1' : 'Player 2'}, draw from pile or discard.`;
+            }
+            updateDrawPile();
+            updateDiscard();
+            updateDrawnCard();
+        }
+
+        function updateScoreTable() {
+            const tableBody = document.querySelector('#score-table tbody');
+            tableBody.innerHTML = '';
+            
+            // Add rows for each completed round
+            roundScores.forEach((scores, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>Round ${index + 1}</td>
+                    <td>${scores.player1}</td>
+                    <td>${scores.player2}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Add row for current round face-up scores
+            const currentRow = document.createElement('tr');
+            const player1FaceUp = sumFaceUp(player1Grid);
+            const player2FaceUp = sumFaceUp(player2Grid);
+            currentRow.innerHTML = `
+                <td>Current Round</td>
+                <td>${player1FaceUp}</td>
+                <td>${player2FaceUp}</td>
+            `;
+            tableBody.appendChild(currentRow);
+            
+            // Add row for totals including current face-up scores
+            const totalRow = document.createElement('tr');
+            const player1Total = player1TotalScore + player1FaceUp;
+            const player2Total = player2TotalScore + player2FaceUp;
+            totalRow.innerHTML = `
+                <td>Total</td>
+                <td>${player1Total}</td>
+                <td>${player2Total}</td>
+            `;
+            tableBody.appendChild(totalRow);
+        }
+
+        let fromDraw = false;
+
+        function drawFrom(source) {
+            if (drawnCard !== null || flipMode) return;
+            if (source === 'draw') {
+                if (drawPile.length === 0) return alert('Draw pile empty!');
+                drawnCard = drawPile.pop();
+                fromDraw = true;
+            } else {
+                if (discardPile.length === 0) return alert('Discard pile empty!');
+                drawnCard = discardPile.pop();
+                fromDraw = false;
+            }
+            updateDiscard();
+            updateDrawPile();
+            updateDrawnCard();
+            updateStatus();
+            renderGrids();
+        }
+
+        function discardDrawn() {
+            if (drawnCard === null || !fromDraw) return;
+            discardPile.push(drawnCard);
+            drawnCard = null;
+            flipMode = true;
+            fromDraw = false;
+            updateDiscard();
+            updateDrawnCard();
+            updateStatus();
+            renderGrids();
+        }
+
+        function handleGridClick(row, col, gridId) {
+            const grid = gridId === 'player1-grid' ? player1Grid : player2Grid;
+            if ((drawnCard === null && !flipMode) || grid[row][col] === null) return;
+            if ((gridId === 'player1-grid' && currentPlayer !== 'player1') || (gridId === 'player2-grid' && currentPlayer !== 'player2')) return;
+            if (flipMode) {
+                if (grid[row][col].faceUp) return alert('Can only flip face-down cards.');
+                grid[row][col].faceUp = true;
+            } else {
+                const oldValue = grid[row][col].value;
+                if (!grid[row][col].faceUp) grid[row][col].faceUp = true;
+                grid[row][col].value = drawnCard;
+                discardPile.push(oldValue);
+            }
+            drawnCard = null;
+            flipMode = false;
+            fromDraw = false;
+            checkColumns(grid);
+            renderGrids();
+            updateDiscard();
+            updateDrawPile();
+            updateDrawnCard();
+            updateStatus();
+            updateScoreTable();
+            if (allFaceUp(grid) && !isLastTurn) {
+                roundEnder = currentPlayer;
+                endRound();
+            } else if (isLastTurn) {
+                finishRound();
+            } else {
+                switchPlayer();
+            }
+        }
+
+        function checkColumns(grid) {
+            for (let col = 0; col < 4; col++) {
+                const column = [grid[0][col], grid[1][col], grid[2][col]];
+                if (column.every(c => c && c.faceUp && c.value === column[0].value)) {
+                    for (let row = 0; row < 3; row++) grid[row][col] = null;
+                }
+            }
+        }
+
+        function allFaceUp(grid) {
+            return grid.flat().filter(c => c !== null).every(c => c.faceUp);
+        }
+
+        function switchPlayer() {
+            currentPlayer = currentPlayer === 'player1' ? 'player2' : 'player1';
+            updateStatus();
+        }
+
+        function endRound() {
+            if (isLastTurn) {
+                finishRound();
+                return;
+            }
+            isLastTurn = true;
+            currentPlayer = currentPlayer === 'player1' ? 'player2' : 'player1';
+            alert(`${currentPlayer === 'player1' ? 'Player 1' : 'Player 2'}, your opponent has all cards up. You get one last turn.`);
+            renderGrids();
+            updateStatus();
+            updateScoreTable();
+        }
+
+        function finishRound() {
+            revealAll();
+            let player1Score = calculateScore(player1Grid);
+            let player2Score = calculateScore(player2Grid);
+            let message = `Round over! Player 1 score: ${player1Score}, Player 2 score: ${player2Score}. `;
+            
+            // Apply doubling rule: double the roundEnder's score if it's not the lowest
+            if (roundEnder === 'player1' && player1Score > player2Score) {
+                player1Score *= 2;
+            } else if (roundEnder === 'player2' && player2Score > player1Score) {
+                player2Score *= 2;
+            }
+            
+            player1TotalScore += player1Score;
+            player2TotalScore += player2Score;
+            roundScores.push({ player1: player1Score, player2: player2Score });
+            lastRoundEnder = roundEnder;
+            
+            message += `Final (with possible double): Player 1 ${player1Score}, Player 2 ${player2Score}. `;
+            message += `Total scores: Player 1 ${player1TotalScore}, Player 2 ${player2TotalScore}.`;
+            alert(message);
+            updateScoreTable();
+            document.getElementById('restart').style.display = 'block';
+        }
+
+        function revealAll() {
+            player1Grid.flat().forEach(c => { if (c) c.faceUp = true; });
+            player2Grid.flat().forEach(c => { if (c) c.faceUp = true; });
+            checkColumns(player1Grid);
+            checkColumns(player2Grid);
+            renderGrids(true);
+            updateScoreTable();
+        }
+
+        function calculateScore(grid) {
+            return grid.flat().filter(c => c !== null).reduce((sum, c) => sum + c.value, 0);
+        }
+
+        // Restart button
+        document.getElementById('restart').onclick = initGame;
+
+        initGame();
+    </script>
+</body>
+</html>
