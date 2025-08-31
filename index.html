@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skyjo: Beach Adventure</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Comic Sans MS', 'Arial', sans-serif;
             text-align: center;
@@ -16,8 +19,8 @@
         }
         #game {
             max-width: 90vw;
-            margin: 0 auto;
-            height: 100%;
+            margin: 0 auto 1rem auto;
+            height: calc(100% - 1rem);
             display: flex;
             flex-direction: column;
         }
@@ -39,7 +42,6 @@
             box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
         }
         .face-up {
-            background-color: #95E1D3;
             color: #2A4D69;
         }
         .face-down {
@@ -49,6 +51,18 @@
             background-repeat: no-repeat;
             background-color: #4ECDC4;
             color: #fff;
+        }
+        .card-value-negative {
+            background-color: #A2D2FF; /* Blue for -2, -1 */
+        }
+        .card-value-low {
+            background-color: #A8E6CF; /* Green for 0–4 */
+        }
+        .card-value-medium {
+            background-color: #FFD3B6; /* Yellow for 5–8 */
+        }
+        .card-value-high {
+            background-color: #FFAAA5; /* Red for 9–12 */
         }
         #center {
             display: flex;
@@ -68,7 +82,6 @@
             border: 2px dashed #2A4D69;
             line-height: 15vh;
             font-size: 4vw;
-            background-color: #95E1D3;
             color: #2A4D69;
         }
         #draw-pile.face-down {
@@ -79,8 +92,11 @@
             background-color: #4ECDC4;
             color: #fff;
         }
+        #discard-pile.face-up {
+            color: #2A4D69;
+        }
         #drawn-card.face-up {
-            background-color: #95E1D3;
+            color: #2A4D69;
         }
         #status {
             font-size: 3vw;
@@ -145,8 +161,8 @@
             }
             .card {
                 width: 23vw;
-                height: 11vh;
-                line-height: 11vh;
+                height: 15vh;
+                line-height: 15vh;
                 font-size: 5vw;
             }
             #center {
@@ -154,8 +170,8 @@
             }
             #draw-pile, #discard-pile, #drawn-card {
                 width: 23vw;
-                height: 11vh;
-                line-height: 11vh;
+                height: 15vh;
+                line-height: 15vh;
                 font-size: 5vw;
             }
             #status {
@@ -274,13 +290,15 @@
                     grid[row][col] = { value: drawPile.pop(), faceUp: false };
                 }
             }
-            const flips = [];
-            while (flips.length < 2) {
-                const r = Math.floor(Math.random() * 3);
-                const c = Math.floor(Math.random() * 4);
-                if (!flips.some(f => f[0] === r && f[1] === c)) {
-                    flips.push([r, c]);
-                    grid[r][c].faceUp = true;
+            // Randomly select two distinct cards to be face-up
+            const positions = [];
+            while (positions.length < 2) {
+                const row = Math.floor(Math.random() * 3);
+                const col = Math.floor(Math.random() * 4);
+                const pos = `${row}-${col}`;
+                if (!positions.includes(pos)) {
+                    positions.push(pos);
+                    grid[row][col].faceUp = true;
                 }
             }
             return grid;
@@ -315,7 +333,17 @@
                         card.classList.add('card');
                         if (grid[row][col].faceUp || reveal) {
                             card.classList.add('face-up');
-                            card.textContent = grid[row][col].value;
+                            const value = grid[row][col].value;
+                            if (value <= -1) {
+                                card.classList.add('card-value-negative');
+                            } else if (value >= 0 && value <= 4) {
+                                card.classList.add('card-value-low');
+                            } else if (value >= 5 && value <= 8) {
+                                card.classList.add('card-value-medium');
+                            } else {
+                                card.classList.add('card-value-high');
+                            }
+                            card.textContent = value;
                         } else {
                             card.classList.add('face-down');
                             card.textContent = '??';
@@ -338,6 +366,18 @@
             const topCard = discardPile[discardPile.length - 1];
             discard.textContent = topCard !== undefined ? topCard : 'Empty';
             discard.classList.toggle('face-up', topCard !== undefined);
+            if (topCard !== undefined) {
+                discard.classList.remove('card-value-negative', 'card-value-low', 'card-value-medium', 'card-value-high');
+                if (topCard <= -1) {
+                    discard.classList.add('card-value-negative');
+                } else if (topCard >= 0 && topCard <= 4) {
+                    discard.classList.add('card-value-low');
+                } else if (topCard >= 5 && topCard <= 8) {
+                    discard.classList.add('card-value-medium');
+                } else {
+                    discard.classList.add('card-value-high');
+                }
+            }
             const canTake = drawnCard === null && flipMode === false && topCard !== undefined;
             const canDiscard = drawnCard !== null && fromDraw && !flipMode;
             discardPileContainer.style.cursor = (canTake || canDiscard) ? 'pointer' : 'default';
@@ -364,6 +404,18 @@
             drawn.textContent = drawnCard !== null ? drawnCard : 'None';
             drawn.classList.toggle('face-up', drawnCard !== null);
             drawn.classList.toggle('card', drawnCard !== null);
+            if (drawnCard !== null) {
+                drawn.classList.remove('card-value-negative', 'card-value-low', 'card-value-medium', 'card-value-high');
+                if (drawnCard <= -1) {
+                    drawn.classList.add('card-value-negative');
+                } else if (drawnCard >= 0 && drawnCard <= 4) {
+                    drawn.classList.add('card-value-low');
+                } else if (drawnCard >= 5 && drawnCard <= 8) {
+                    drawn.classList.add('card-value-medium');
+                } else {
+                    drawn.classList.add('card-value-high');
+                }
+            }
             drawn.style.cursor = 'default';
             drawn.onclick = null;
         }
