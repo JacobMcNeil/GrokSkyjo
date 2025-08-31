@@ -45,7 +45,7 @@
         .face-down {
             background-image: url('card_back.jpg');
             background-size: cover;
-            background-position: center;
+            background-position: top;
             background-repeat: no-repeat;
             background-color: #4ECDC4;
             color: #fff;
@@ -74,7 +74,7 @@
         #draw-pile.face-down {
             background-image: url('card_back.jpg');
             background-size: cover;
-            background-position: center;
+            background-position: top;
             background-repeat: no-repeat;
             background-color: #4ECDC4;
             color: #fff;
@@ -146,7 +146,7 @@
             .card {
                 width: 23vw;
                 height: 11vh;
-                line-height: 15vh;
+                line-height: 11vh;
                 font-size: 5vw;
             }
             #center {
@@ -155,7 +155,7 @@
             #draw-pile, #discard-pile, #drawn-card {
                 width: 23vw;
                 height: 11vh;
-                line-height: 15vh;
+                line-height: 11vh;
                 font-size: 5vw;
             }
             #status {
@@ -271,13 +271,18 @@
             for (let row = 0; row < 3; row++) {
                 grid[row] = [];
                 for (let col = 0; col < 4; col++) {
-                    grid[row][col] = { value: drawPile.pop(), faceUp: true };
+                    grid[row][col] = { value: drawPile.pop(), faceUp: false };
                 }
             }
-            // Randomly select one card to be face-down
-            const row = Math.floor(Math.random() * 3);
-            const col = Math.floor(Math.random() * 4);
-            grid[row][col].faceUp = false;
+            const flips = [];
+            while (flips.length < 2) {
+                const r = Math.floor(Math.random() * 3);
+                const c = Math.floor(Math.random() * 4);
+                if (!flips.some(f => f[0] === r && f[1] === c)) {
+                    flips.push([r, c]);
+                    grid[r][c].faceUp = true;
+                }
+            }
             return grid;
         }
 
