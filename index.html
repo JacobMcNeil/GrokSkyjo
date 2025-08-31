@@ -11,17 +11,22 @@
             text-align: center;
             background: linear-gradient(to bottom, #F4E4BC, #4ECDC4);
             margin: 0;
-            padding: 1rem;
+            padding: 0.5rem;
+            height: 100vh;
+            overflow: hidden;
         }
         #game {
             max-width: 90vw;
             margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         .player-grid {
             display: grid;
             grid-template-columns: repeat(4, 20vw);
-            gap: 2vw;
-            margin: 2vh 0;
+            gap: 1vw;
+            margin: 1vh 0;
             max-width: 100%;
         }
         .card {
@@ -45,8 +50,8 @@
         #center {
             display: flex;
             justify-content: center;
-            gap: 5vw;
-            margin: 2vh 0;
+            gap: 3vw;
+            margin: 1vh 0;
             flex-wrap: wrap;
         }
         .pile {
@@ -71,31 +76,31 @@
             background-color: #95E1D3;
         }
         #status {
-            font-size: 4vw;
+            font-size: 3vw;
             margin: 1vh 0;
             color: #2A4D69;
             text-shadow: 1px 1px 2px #F4E4BC;
         }
         #score-table {
             width: 80%;
-            margin: 2vh auto;
+            margin: 1vh auto;
             border-collapse: collapse;
             background-color: #95E1D3;
             color: #2A4D69;
-            font-size: 4vw;
+            font-size: 3vw;
             text-shadow: 1px 1px 2px #F4E4BC;
         }
         #score-table th, #score-table td {
             border: 1px solid #F4E4BC;
-            padding: 1vw;
+            padding: 0.5vw;
         }
         #score-table th {
             background-color: #4ECDC4;
         }
         button {
-            padding: 2vw 4vw;
-            margin: 2vw;
-            font-size: 4vw;
+            padding: 1vw 2vw;
+            margin: 1vw;
+            font-size: 3vw;
             border-radius: 10px;
             cursor: pointer;
             background-color: #FF6B6B;
@@ -110,34 +115,40 @@
             cursor: default;
         }
         @media (max-width: 600px) {
+            body {
+                padding: 0.2rem;
+            }
             .player-grid {
-                grid-template-columns: repeat(4, 22vw);
-                gap: 1vw;
+                grid-template-columns: repeat(4, 23vw);
+                gap: 0.5vw;
             }
             .card {
-                width: 22vw;
-                height: 33vw;
-                line-height: 33vw;
-                font-size: 6vw;
-            }
-            #draw-pile, #discard-pile, #drawn-card {
-                width: 22vw;
-                height: 33vw;
-                line-height: 33vw;
+                width: 23vw;
+                height: 20vh;
+                line-height: 20vh;
                 font-size: 6vw;
             }
             #center {
-                gap: 3vw;
+                gap: 2vw;
             }
-            #status, #score-table {
-                font-size: 5vw;
+            #draw-pile, #discard-pile, #drawn-card {
+                width: 23vw;
+                height: 20vh;
+                line-height: 20vh;
+                font-size: 6vw;
+            }
+            #status {
+                font-size: 4vw;
+            }
+            #score-table {
+                font-size: 4vw;
             }
             #score-table th, #score-table td {
-                padding: 1.5vw;
+                padding: 0.3vw;
             }
             button {
-                padding: 3vw 6vw;
-                font-size: 5vw;
+                padding: 1vw 2vw;
+                font-size: 4vw;
             }
         }
     </style>
