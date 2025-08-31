@@ -44,6 +44,10 @@
         }
         .face-down {
             background-image: url('card_back.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #4ECDC4;
             color: #fff;
         }
         #center {
@@ -69,6 +73,10 @@
         }
         #draw-pile.face-down {
             background-image: url('card_back.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #4ECDC4;
             color: #fff;
         }
         #drawn-card.face-up {
@@ -132,10 +140,13 @@
                 grid-template-columns: repeat(4, 23vw);
                 gap: 0.5vw;
             }
+            .player-grid .empty-slot {
+                height: 15vh;
+            }
             .card {
                 width: 23vw;
-                height: 10vh;
-                line-height: 10vh;
+                height: 15vh;
+                line-height: 15vh;
                 font-size: 5vw;
             }
             #center {
@@ -143,8 +154,8 @@
             }
             #draw-pile, #discard-pile, #drawn-card {
                 width: 23vw;
-                height: 10vh;
-                line-height: 10vh;
+                height: 15vh;
+                line-height: 15vh;
                 font-size: 5vw;
             }
             #status {
@@ -310,7 +321,7 @@
                         }
                     } else {
                         card.style.width = '20vw';
-                        card.style.height = '30vw';
+                        card.classList.add('empty-slot');
                     }
                     container.appendChild(card);
                 }
