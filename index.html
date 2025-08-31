@@ -310,6 +310,9 @@
             }
             const player1Sum = sumFaceUp(player1Grid);
             const player2Sum = sumFaceUp(player2Grid);
+            if (player1Sum === player2Sum) {
+                return Math.random() < 0.5 ? 'player1' : 'player2';
+            }
             return player1Sum > player2Sum ? 'player1' : 'player2';
         }
 
@@ -326,6 +329,7 @@
             const container = document.getElementById(id);
             container.innerHTML = '';
             const isClickable = clickable && (drawnCard !== null || flipMode);
+            console.log(`Rendering ${id}: clickable=${clickable}, drawnCard=${drawnCard}, flipMode=${flipMode}, isClickable=${isClickable}`);
             for (let row = 0; row < 3; row++) {
                 for (let col = 0; col < 4; col++) {
                     const card = document.createElement('div');
@@ -350,7 +354,10 @@
                         }
                         card.style.cursor = isClickable ? 'pointer' : 'default';
                         if (isClickable) {
-                            card.onclick = () => handleGridClick(row, col, id);
+                            card.onclick = () => {
+                                console.log(`Clicked ${id} at row=${row}, col=${col}, drawnCard=${drawnCard}, flipMode=${flipMode}`);
+                                handleGridClick(row, col, id);
+                            };
                         }
                     } else {
                         card.style.width = '20vw';
@@ -405,7 +412,7 @@
             drawn.classList.toggle('face-up', drawnCard !== null);
             drawn.classList.toggle('card', drawnCard !== null);
             if (drawnCard !== null) {
-                discard.classList.remove('card-value-negative', 'card-value-low', 'card-value-medium', 'card-value-high');
+                drawn.classList.remove('card-value-negative', 'card-value-low', 'card-value-medium', 'card-value-high');
                 if (drawnCard <= -1) {
                     drawn.classList.add('card-value-negative');
                 } else if (drawnCard >= 0 && drawnCard <= 4) {
