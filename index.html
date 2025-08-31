@@ -233,16 +233,10 @@
                     grid[row][col] = { value: drawPile.pop(), faceUp: true };
                 }
             }
-            
-            const flips = [];
-            while (flips.length < 10) {
-                const r = Math.floor(Math.random() * 3);
-                const c = Math.floor(Math.random() * 4);
-                if (!flips.some(f => f[0] === r && f[1] === c)) {
-                    flips.push([r, c]);
-                    grid[r][c].faceUp = false;
-                }
-            }
+            // Randomly select one card to be face-down
+            const row = Math.floor(Math.random() * 3);
+            const col = Math.floor(Math.random() * 4);
+            grid[row][col].faceUp = false;
             return grid;
         }
 
@@ -368,14 +362,12 @@
             `;
             tableBody.appendChild(currentRow);
             
-            // Add row for totals including current face-up scores
+            // Add row for totals
             const totalRow = document.createElement('tr');
-            const player1Total = player1TotalScore + player1FaceUp;
-            const player2Total = player2TotalScore + player2FaceUp;
             totalRow.innerHTML = `
                 <td>Total</td>
-                <td>${player1Total}</td>
-                <td>${player2Total}</td>
+                <td>${player1TotalScore}</td>
+                <td>${player2TotalScore}</td>
             `;
             tableBody.appendChild(totalRow);
         }
